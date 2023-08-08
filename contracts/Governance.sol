@@ -7,10 +7,12 @@ import "./IPoSPool.sol";
 
 contract Governance is AccessControl {
     bytes32 public constant PROPOSAL_ROLE = keccak256("PROPOSAL_ROLE");
+    
     // internal contracts
     Staking public constant STAKING = Staking(
         address(0x0888000000000000000000000000000000000002)
     );
+    
     struct Proposal {
         string title;
         string discussion;
@@ -38,12 +40,14 @@ contract Governance is AccessControl {
         address indexed proposer,
         string title
     );
+    
     event Voted(
         uint256 indexed proposalId,
         address indexed voter,
         uint256 indexed votedOption,
         uint256 votedAmount
     );
+    
     event WithdrawVoted(
         uint256 indexed proposalId,
         address indexed voter,
