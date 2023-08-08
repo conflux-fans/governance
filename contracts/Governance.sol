@@ -4,8 +4,9 @@ pragma solidity ^0.8.9;
 import "@confluxfans/contracts/InternalContracts/Staking.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./IPoSPool.sol";
+import "./IGovernance.sol";
 
-contract Governance is AccessControl {
+contract Governance is AccessControl, IGovernance {
     bytes32 public constant PROPOSAL_ROLE = keccak256("PROPOSAL_ROLE");
     
     // internal contracts
@@ -13,48 +14,6 @@ contract Governance is AccessControl {
         address(0x0888000000000000000000000000000000000002)
     );
     
-    struct Proposal {
-        string title;
-        string discussion;
-        uint256 deadline;
-        string[] options;
-        uint256[] optionVotes;
-        // address => vote_option => vote_power
-        mapping(address => mapping(uint256 => uint256)) votedPower;
-        address proposer;
-    }
-
-    struct ProposalAbstract {
-        string title;
-        string discussion;
-        uint256 deadline;
-        string[] options;
-        uint256[] optionVotes;
-        string status;
-        address proposer;
-        uint256 proposalId;
-    }
-
-    event Proposed(
-        uint256 indexed proposalId,
-        address indexed proposer,
-        string title
-    );
-    
-    event Voted(
-        uint256 indexed proposalId,
-        address indexed voter,
-        uint256 indexed votedOption,
-        uint256 votedAmount
-    );
-    
-    event WithdrawVoted(
-        uint256 indexed proposalId,
-        address indexed voter,
-        uint256 indexed withdrawOption,
-        uint256 withdrawAmount
-    );
-
     // proposal
     address public nextProposer;
     uint256 public proposalCnt;

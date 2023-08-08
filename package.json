@@ -31,6 +31,9 @@
   },
   "dependencies": {
     "@confluxfans/contracts": "^0.3.3",
-    "@openzeppelin/contracts": "^4.9.3"
+    "@openzeppelin/contracts": "^4.9.3",
+    "dotenv": "^16.3.1",
+    "hardhat-conflux": "^0.1.1",
+    "js-conflux-sdk": "^2.1.12"
   }
 }
