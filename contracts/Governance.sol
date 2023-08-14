@@ -2,17 +2,25 @@
 pragma solidity ^0.8.9;
 
 import "@confluxfans/contracts/InternalContracts/Staking.sol";
+import "@confluxfans/contracts/InternalContracts/ParamsControl.sol";
+import "@confluxfans/contracts/InternalContracts/PoSRegister.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
 import "./IPoSPool.sol";
 import "./IGovernance.sol";
 
 contract Governance is AccessControl, IGovernance {
+    // Add the library methods
+    using EnumerableSet for EnumerableSet.AddressSet;
+
     bytes32 public constant PROPOSAL_ROLE = keccak256("PROPOSAL_ROLE");
-    
     // internal contracts
-    Staking public constant STAKING = Staking(
-        address(0x0888000000000000000000000000000000000002)
-    );
+    Staking public constant STAKING = Staking(0x0888000000000000000000000000000000000002);
+    PoSRegister public constant POS_REGISTER = PoSRegister(0x0888000000000000000000000000000000000005);
+    ParamsControl public constant PARAMS_CONTROL = ParamsControl(0x0888000000000000000000000000000000000007);
+
+    uint256 public constant RATIO_BASE = 1_000_000_000;
+    uint256 public MIN_VOTE_RATIO = 1_000_000_0 * 5;
     
     // proposal
     address public nextProposer;
@@ -21,7 +29,8 @@ contract Governance is AccessControl, IGovernance {
 
     // extend delay
     uint256 public extendDelay;
-    mapping(address => bool) public poolWhitelist;
+    // Declare a set state variable
+    EnumerableSet.AddressSet private poolWhitelist;
 
     constructor(uint256 _extendDelay) {
         extendDelay = _extendDelay;
@@ -111,6 +120,28 @@ contract Governance is AccessControl, IGovernance {
         nextProposer = proposer;
     }
 
+    // todo test
+    function currentRoundTotalPoSVotes() public view returns (uint256) {
+        return PARAMS_CONTROL.posStakeForVotes(PARAMS_CONTROL.currentRound());
+    }
+
+    // todo test
+    function userPoSVotes(address user) public view returns (uint256) {
+        // get address self staked votes
+        bytes32 identity = POS_REGISTER.addressToIdentifier(user);
+        (uint256 totalStaked, uint256 totalUnlocked) = POS_REGISTER.getVotes(identity);
+        uint256  totalPoSVotes = totalStaked - totalUnlocked;
+
+        // sum votes in pos pools
+        uint256 len = poolWhitelist.length();
+        for(uint256 i = 0; i < len; i++) {
+            address pool = poolWhitelist.at(i);
+            IPoSPool.UserSummary memory userSummary = IPoSPool(pool).userSummary(user);
+            totalPoSVotes += userSummary.available;
+        }
+        return totalPoSVotes; // TODO multiple 1000 ether
+    }
+
     function _submit(
         string memory title,
         string memory discussion,
@@ -133,6 +164,18 @@ contract Governance is AccessControl, IGovernance {
         emit Proposed(proposalCnt, proposer, title);
         nextProposer = address(0);
         proposalCnt += 1;
+    }
+
+    function submit(
+        string memory title,
+        string memory discussion,
+        uint256 deadline,
+        string[] memory options
+    ) public {
+        uint256 totalPoSVotes = currentRoundTotalPoSVotes();
+        uint256 _userVotes = userPoSVotes(msg.sender);
+        require(_userVotes > totalPoSVotes * MIN_VOTE_RATIO / RATIO_BASE, "not enough votes");
+        _submit(title, discussion, deadline, options, msg.sender);
     }
 
     function submitProposal(
@@ -172,8 +215,16 @@ contract Governance is AccessControl, IGovernance {
         extendDelay = _extendDelay;
     }
 
+    function setMinVoteRatio(uint256 _minVoteRatio) public onlyRole(PROPOSAL_ROLE) {
+        MIN_VOTE_RATIO = _minVoteRatio;
+    }
+
     function setPoolWhitelist(address pool, bool flag) public onlyRole(PROPOSAL_ROLE) {
-        poolWhitelist[pool] = flag;
+        if (flag) {
+            poolWhitelist.add(pool);
+        } else {
+            poolWhitelist.remove(pool);
+        }
     }
 
     function _vote(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower) public {
@@ -224,7 +275,7 @@ contract Governance is AccessControl, IGovernance {
     }
 
     function voteThroughPosPool(address pool, uint256 proposalId, uint256 optionId, uint256 power) public {
-        require(poolWhitelist[pool], "pool is not in whitelist");
+        require(poolWhitelist.contains(pool), "pool is not in whitelist");
         uint256 availableVotePower = IPoSPool(pool).userVotePower(msg.sender);
         _vote(proposalId, optionId, power, availableVotePower);
     }
