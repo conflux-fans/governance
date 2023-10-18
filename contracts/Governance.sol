@@ -6,10 +6,11 @@ import "@confluxfans/contracts/InternalContracts/ParamsControl.sol";
 import "@confluxfans/contracts/InternalContracts/PoSRegister.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./IPoSPool.sol";
 import "./IGovernance.sol";
 
-contract Governance is AccessControl, IGovernance {
+contract Governance is AccessControl, IGovernance, Initializable {
     // Add the library methods
     using EnumerableSet for EnumerableSet.AddressSet;
 
@@ -34,6 +35,10 @@ contract Governance is AccessControl, IGovernance {
 
     constructor(uint256 _extendDelay) {
         extendDelay = _extendDelay;
+        _setupRole(PROPOSAL_ROLE, msg.sender);
+    }
+
+    function initialize() public initializer {
         _setupRole(PROPOSAL_ROLE, msg.sender);
     }
 
@@ -75,6 +80,26 @@ contract Governance is AccessControl, IGovernance {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
         return proposal.votedPower[voter][option];
+    }
+
+    function getVoteForProposal(uint256 proposalId, address voter) public view returns (uint256[] memory) {
+        require(proposalId < proposalCnt, "invalid proposal ID");
+        Proposal storage proposal = proposals[proposalId];
+        uint256[] memory res = new uint256[](proposal.options.length);
+        for(uint256 i = 0; i < proposal.options.length; ++i) {
+            res[i] = proposal.votedPower[voter][i];
+        }
+        return res;
+    }
+
+    function getPoolVoteForProposal(uint256 proposalId, address pool, address voter) public view returns (uint256[] memory) {
+        require(proposalId < proposalCnt, "invalid proposal ID");
+        Proposal storage proposal = proposals[proposalId];
+        uint256[] memory res = new uint256[](proposal.options.length);
+        for(uint256 i = 0; i < proposal.options.length; ++i) {
+            res[i] = proposal.posPoolVotedPower[pool][voter][i];
+        }
+        return res;
     }
 
     function getProposalById(uint256 proposalId)
@@ -120,13 +145,11 @@ contract Governance is AccessControl, IGovernance {
         nextProposer = proposer;
     }
 
-    // todo test
     function currentRoundTotalPoSVotes() public view returns (uint256) {
         return PARAMS_CONTROL.posStakeForVotes(PARAMS_CONTROL.currentRound());
     }
 
-    // todo test
-    function userPoSVotes(address user) public view returns (uint256) {
+    function userPoSStakes(address user) public view returns (uint256) {
         // get address self staked votes
         bytes32 identity = POS_REGISTER.addressToIdentifier(user);
         (uint256 totalStaked, uint256 totalUnlocked) = POS_REGISTER.getVotes(identity);
@@ -139,7 +162,7 @@ contract Governance is AccessControl, IGovernance {
             IPoSPool.UserSummary memory userSummary = IPoSPool(pool).userSummary(user);
             totalPoSVotes += userSummary.available;
         }
-        return totalPoSVotes; // TODO multiple 1000 ether
+        return totalPoSVotes * 1000 ether;
     }
 
     function _submit(
@@ -166,6 +189,7 @@ contract Governance is AccessControl, IGovernance {
         proposalCnt += 1;
     }
 
+    // submit if user's vote power meet the requirement
     function submit(
         string memory title,
         string memory discussion,
@@ -173,7 +197,7 @@ contract Governance is AccessControl, IGovernance {
         string[] memory options
     ) public {
         uint256 totalPoSVotes = currentRoundTotalPoSVotes();
-        uint256 _userVotes = userPoSVotes(msg.sender);
+        uint256 _userVotes = userPoSStakes(msg.sender);
         require(_userVotes > totalPoSVotes * MIN_VOTE_RATIO / RATIO_BASE, "not enough votes");
         _submit(title, discussion, deadline, options, msg.sender);
     }
@@ -211,6 +235,10 @@ contract Governance is AccessControl, IGovernance {
         proposals[proposals.length - 1].optionVotes = optionVotes;
     }
 
+    function addSubmiter(address user) public onlyRole(PROPOSAL_ROLE) {
+        _setupRole(PROPOSAL_ROLE, user);
+    }
+
     function setExtendDelay(uint256 _extendDelay) public onlyRole(PROPOSAL_ROLE) {
         extendDelay = _extendDelay;
     }
@@ -227,7 +255,7 @@ contract Governance is AccessControl, IGovernance {
         }
     }
 
-    function _vote(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower) public {
+    function _vote(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower) internal {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
         require(proposal.deadline >= block.number, "the proposal has finished");
@@ -274,9 +302,51 @@ contract Governance is AccessControl, IGovernance {
         _vote(proposalId, optionId, power, availableVotePower);
     }
 
+    function _voteThroughPos(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower, address pool) internal {
+        require(proposalId < proposalCnt, "invalid proposal ID");
+        Proposal storage proposal = proposals[proposalId];
+        require(proposal.deadline >= block.number, "the proposal has finished");
+        require(optionId < proposal.options.length, "invalid option ID");
+
+        uint256 lastWinner = getWinner(proposalId);
+
+        uint256 lastVotedPower = proposal.posPoolVotedPower[pool][msg.sender][optionId];
+        if (lastVotedPower > 0) {
+            proposal.optionVotes[optionId] -= lastVotedPower;
+            proposal.posPoolVotedPower[pool][msg.sender][optionId] = 0;
+            emit WithdrawVoted(
+                proposalId,
+                msg.sender,
+                optionId,
+                lastVotedPower
+            );
+        }
+
+        // check total votePower is not execeed the availableVotePower
+        uint256 currentVotedPower = 0;
+        for(uint256 i = 0; i < proposal.options.length; ++i) {
+            currentVotedPower += proposal.posPoolVotedPower[pool][msg.sender][i];
+        }
+        require(currentVotedPower + power <= availableVotePower, "exceed total vote power");
+
+        //
+        proposal.posPoolVotedPower[pool][msg.sender][optionId] = power;
+        proposal.optionVotes[optionId] += power;
+        
+        emit Voted(proposalId, msg.sender, optionId, power);
+
+        uint256 newWinner = getWinner(proposalId);
+        if (
+            newWinner != lastWinner &&
+            block.number + extendDelay > proposal.deadline
+        ) {
+            proposal.deadline = block.number + extendDelay;
+        }
+    }
+
     function voteThroughPosPool(address pool, uint256 proposalId, uint256 optionId, uint256 power) public {
         require(poolWhitelist.contains(pool), "pool is not in whitelist");
         uint256 availableVotePower = IPoSPool(pool).userVotePower(msg.sender);
-        _vote(proposalId, optionId, power, availableVotePower);
+        _voteThroughPos(proposalId, optionId, power, availableVotePower, pool);
     }
 }

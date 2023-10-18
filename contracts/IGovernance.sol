@@ -10,6 +10,8 @@ interface IGovernance {
         uint256[] optionVotes;
         // address => vote_option => vote_power
         mapping(address => mapping(uint256 => uint256)) votedPower;
+        // pool address => user address => vote_option => vote_power
+        mapping(address => mapping(address => mapping(uint256 => uint256))) posPoolVotedPower;
         address proposer;
     }
 
@@ -33,6 +35,10 @@ interface IGovernance {
     function proposalCount() external view returns (uint256);
 
     function getVoteForProposal(uint256 proposalId, address voter, uint256 option) external view returns (uint256);
+    
+    function getVoteForProposal(uint256 proposalId, address voter) external view returns (uint256[] memory);
+    
+    function getPoolVoteForProposal(uint256 proposalId, address pool, address voter) external view returns (uint256[] memory);
 
     function getProposalById(uint256 proposalId) external view returns (ProposalAbstract memory);
 
