@@ -14,11 +14,11 @@ contract Governance is AccessControl, IGovernance, Initializable {
     // Add the library methods
     using EnumerableSet for EnumerableSet.AddressSet;
 
-    bytes32 public constant PROPOSAL_ROLE = keccak256("PROPOSAL_ROLE");
+    bytes32 private constant PROPOSAL_ROLE = keccak256("PROPOSAL_ROLE");
     // internal contracts
-    Staking public constant STAKING = Staking(0x0888000000000000000000000000000000000002);
-    PoSRegister public constant POS_REGISTER = PoSRegister(0x0888000000000000000000000000000000000005);
-    ParamsControl public constant PARAMS_CONTROL = ParamsControl(0x0888000000000000000000000000000000000007);
+    Staking private constant STAKING = Staking(0x0888000000000000000000000000000000000002);
+    PoSRegister private constant POS_REGISTER = PoSRegister(0x0888000000000000000000000000000000000005);
+    ParamsControl private constant PARAMS_CONTROL = ParamsControl(0x0888000000000000000000000000000000000007);
 
     uint256 public constant RATIO_BASE = 1_000_000_000;
     uint256 public MIN_VOTE_RATIO = 1_000_000_0 * 5;
@@ -141,10 +141,6 @@ contract Governance is AccessControl, IGovernance, Initializable {
         return winner;
     }
 
-    function setNextProposer(address proposer) public onlyRole(PROPOSAL_ROLE) {
-        nextProposer = proposer;
-    }
-
     function currentRoundTotalPoSVotes() public view returns (uint256) {
         return PARAMS_CONTROL.posStakeForVotes(PARAMS_CONTROL.currentRound());
     }
@@ -233,6 +229,10 @@ contract Governance is AccessControl, IGovernance, Initializable {
         require(deadline < block.number, "history proposal is not closed");
         _submit(title, discussion, deadline, options, proposer);
         proposals[proposals.length - 1].optionVotes = optionVotes;
+    }
+
+    function setNextProposer(address proposer) public onlyRole(PROPOSAL_ROLE) {
+        nextProposer = proposer;
     }
 
     function addSubmiter(address user) public onlyRole(PROPOSAL_ROLE) {
