@@ -28,11 +28,11 @@ async function main() {
         from: account,
     }).executed();
 
-    receipt = await governance.addSubmiter("cfxtest:aak6rc909w6nppbj36xnj4nt0yeux0zg3pt2b4wrxk").sendTransaction({
+    receipt = await governance.addSubmiter("net8888:aamjm0nd4wggf2av5u30txy26zjpzsar8jauzs5d8z").sendTransaction({
         from: account,
     }).executed();
 
-    receipt = await governance.setPoolWhitelist("cfxtest:acgwa148z517jj15w9je5sdzn8p8j044kjrvjz92c1", true).sendTransaction({
+    receipt = await governance.setPoolWhitelist("NET8888:TYPE.CONTRACT:ACATSCT5M6P0D5YMK6P11NDHRZAFH4P52EV7HNZ3G5", true).sendTransaction({
         from: account,
     }).executed();
 

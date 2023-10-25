@@ -55,6 +55,7 @@ contract Governance is AccessControl, IGovernance, Initializable {
         ProposalAbstract memory res;
         res.title = proposal.title;
         res.discussion = proposal.discussion;
+        res.description = proposal.description;
         res.deadline = proposal.deadline;
         res.options = proposal.options;
         res.optionVotes = proposal.optionVotes;
@@ -166,7 +167,8 @@ contract Governance is AccessControl, IGovernance, Initializable {
         string memory discussion,
         uint256 deadline,
         string[] memory options,
-        address proposer
+        address proposer,
+        string memory description
     ) internal {
         require(options.length <= 1000, "too many options");
 
@@ -175,6 +177,7 @@ contract Governance is AccessControl, IGovernance, Initializable {
 
         proposal.title = title;
         proposal.discussion = discussion;
+        proposal.description = description;
         proposal.deadline = deadline;
         proposal.options = options;
         proposal.optionVotes = new uint256[](options.length);
@@ -190,22 +193,24 @@ contract Governance is AccessControl, IGovernance, Initializable {
         string memory title,
         string memory discussion,
         uint256 deadline,
-        string[] memory options
+        string[] memory options,
+        string memory description
     ) public {
         uint256 totalPoSVotes = currentRoundTotalPoSVotes();
         uint256 _userVotes = userPoSStakes(msg.sender);
         require(_userVotes > totalPoSVotes * MIN_VOTE_RATIO / RATIO_BASE, "not enough votes");
-        _submit(title, discussion, deadline, options, msg.sender);
+        _submit(title, discussion, deadline, options, msg.sender, description);
     }
 
     function submitProposal(
         string memory title,
         string memory discussion,
         uint256 deadline,
-        string[] memory options
+        string[] memory options,
+        string memory description
     ) public {
         require(msg.sender == nextProposer, "sender is not the next proposer");
-        _submit(title, discussion, deadline, options, msg.sender);
+        _submit(title, discussion, deadline, options, msg.sender, description);
     }
 
     function submitProposalByWhitelist(
@@ -213,9 +218,10 @@ contract Governance is AccessControl, IGovernance, Initializable {
         string memory discussion,
         uint256 deadline,
         string[] memory options,
-        address proposer
+        address proposer,
+        string memory description
     ) public onlyRole(PROPOSAL_ROLE) {
-        _submit(title, discussion, deadline, options, proposer);
+        _submit(title, discussion, deadline, options, proposer, description);
     }
 
     function submitHistoryProposalByWhitelist(
@@ -224,10 +230,11 @@ contract Governance is AccessControl, IGovernance, Initializable {
         uint256 deadline,
         string[] memory options,
         uint256[] memory optionVotes,
-        address proposer
+        address proposer,
+        string memory description
     ) public onlyRole(PROPOSAL_ROLE) {
         require(deadline < block.number, "history proposal is not closed");
-        _submit(title, discussion, deadline, options, proposer);
+        _submit(title, discussion, deadline, options, proposer, description);
         proposals[proposals.length - 1].optionVotes = optionVotes;
     }
 

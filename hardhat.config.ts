@@ -30,6 +30,11 @@ const config: HardhatUserConfig = {
             url: "https://test.confluxrpc.com",
             accounts: [process.env.PRIVATE_KEY as string],
             chainId: 1,
+        },
+        net8888: {
+            url: "http://net8888cfx.confluxrpc.com",
+            accounts: [process.env.PRIVATE_KEY as string],
+            chainId: 8888,
         }
     }
 };

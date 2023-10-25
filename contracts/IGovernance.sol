@@ -5,6 +5,7 @@ interface IGovernance {
     struct Proposal {
         string title;
         string discussion;
+        string description;
         uint256 deadline;
         string[] options;
         uint256[] optionVotes;
@@ -18,6 +19,7 @@ interface IGovernance {
     struct ProposalAbstract {
         string title;
         string discussion;
+        string description;
         uint256 deadline;
         string[] options;
         uint256[] optionVotes;
@@ -48,11 +50,11 @@ interface IGovernance {
 
     function setNextProposer(address proposer) external;
 
-    function submitProposal( string memory title, string memory discussion, uint256 deadline, string[] memory options) external;
+    function submitProposal( string memory title, string memory discussion, uint256 deadline, string[] memory options, string memory description) external;
 
-    function submitProposalByWhitelist( string memory title, string memory discussion, uint256 deadline, string[] memory options, address proposer) external;
+    function submitProposalByWhitelist( string memory title, string memory discussion, uint256 deadline, string[] memory options, address proposer, string memory description) external;
 
-    function submitHistoryProposalByWhitelist( string memory title, string memory discussion, uint256 deadline, string[] memory options, uint256[] memory optionVotes, address proposer) external;
+    function submitHistoryProposalByWhitelist( string memory title, string memory discussion, uint256 deadline, string[] memory options, uint256[] memory optionVotes, address proposer, string memory description) external;
 
     function setExtendDelay(uint256 _extendDelay) external;
 

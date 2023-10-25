@@ -11,7 +11,7 @@ async function main() {
         from: account,
     }).executed(); */
 
-    let posPool = 'cfxtest:acgwa148z517jj15w9je5sdzn8p8j044kjrvjz92c1';
+    let posPool = 'cfxtest:ace1xye5bt56d4snfesyw2jupgt9ve3ebughhj8z1p';
     let receipt = await Governance.setPoolWhitelist(posPool, true).sendTransaction({
         from: account,
     }).executed();
