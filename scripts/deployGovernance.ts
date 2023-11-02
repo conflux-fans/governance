@@ -4,16 +4,17 @@ async function main() {
     // @ts-ignore
     const [account] = await conflux.getSigners();
     // @ts-ignore
-    const Governance = await conflux.getContractFactory("Governance");
+    /* const Governance = await conflux.getContractFactory("Governance");
     let receipt = await Governance.constructor(3600).sendTransaction({
         from: account,
     }).executed();
 
-    const governanceAddr = receipt.contractCreated;
+    const governanceAddr = receipt.contractCreated; */
+    const governanceAddr = 'cfx:acgg6rhba73ccph232vcmudbafatm13p5pwz8hnk2j';
 
     // @ts-ignore
     const Proxy = await conflux.getContractFactory("Proxy1967");
-    receipt = await Proxy.constructor(governanceAddr, '0x8129fc1c').sendTransaction({
+    let receipt = await Proxy.constructor(governanceAddr, '0x8129fc1c').sendTransaction({
         from: account,
     }).executed();
 
@@ -28,21 +29,17 @@ async function main() {
         from: account,
     }).executed();
 
-    receipt = await governance.addSubmiter("net8888:aamjm0nd4wggf2av5u30txy26zjpzsar8jauzs5d8z").sendTransaction({
+    /* receipt = await governance.addSubmiter("net8888:aamjm0nd4wggf2av5u30txy26zjpzsar8jauzs5d8z").sendTransaction({
         from: account,
     }).executed();
 
     receipt = await governance.setPoolWhitelist("NET8888:TYPE.CONTRACT:ACATSCT5M6P0D5YMK6P11NDHRZAFH4P52EV7HNZ3G5", true).sendTransaction({
         from: account,
-    }).executed();
+    }).executed(); */
 
     receipt = await governance.setMinVoteRatio(1_000_000_0 * 5).sendTransaction({
         from: account,
     }).executed();
-
-    // todo set pool whitelist
-
-    // console.log("Governance deployed to:", receipt.contractCreated)
 
     console.log('Finished');
 }

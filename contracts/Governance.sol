@@ -35,11 +35,11 @@ contract Governance is AccessControl, IGovernance, Initializable {
 
     constructor(uint256 _extendDelay) {
         extendDelay = _extendDelay;
-        _setupRole(PROPOSAL_ROLE, msg.sender);
+        _grantRole(PROPOSAL_ROLE, msg.sender);
     }
 
     function initialize() public initializer {
-        _setupRole(PROPOSAL_ROLE, msg.sender);
+        _grantRole(PROPOSAL_ROLE, msg.sender);
     }
 
     function getBlockNumber() public view returns (uint256) {
@@ -243,7 +243,11 @@ contract Governance is AccessControl, IGovernance, Initializable {
     }
 
     function addSubmiter(address user) public onlyRole(PROPOSAL_ROLE) {
-        _setupRole(PROPOSAL_ROLE, user);
+        _grantRole(PROPOSAL_ROLE, user);
+    }
+
+    function removeSubmiter(address user) public onlyRole(PROPOSAL_ROLE) {
+        _revokeRole(PROPOSAL_ROLE, user);
     }
 
     function setExtendDelay(uint256 _extendDelay) public onlyRole(PROPOSAL_ROLE) {
