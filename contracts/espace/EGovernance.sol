@@ -207,7 +207,8 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
     ) public onlyRole(PROPOSAL_ROLE) {
         require(deadline < block.number, "history proposal is not closed");
         _submit(title, discussion, deadline, options, proposer, description);
-        proposals[proposals.length - 1].optionVotes = optionVotes;
+        // proposals[proposals.length - 1].optionVotes = optionVotes;
+        _coreProposalOptionVotes[proposalCnt - 1] = optionVotes;
     }
 
     function submitProposal(
@@ -322,6 +323,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         emit Voted(proposalId, msg.sender, optionId, power);
     }
 
+    // todo test
     function voteThroughPosPool(address pool, uint256 proposalId, uint256 optionId, uint256 power) public {
         require(poolWhitelist.contains(pool), "pool is not in whitelist");
         uint256 availableVotePower = IPoSPool(pool).userVotePower(msg.sender);
