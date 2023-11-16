@@ -48,15 +48,7 @@ interface IGovernance {
 
     function getWinner(uint256 proposalId) external view returns (uint256);
 
-    function setNextProposer(address proposer) external;
-
-    function submitProposal( string memory title, string memory discussion, uint256 deadline, string[] memory options, string memory description) external;
-
-    function submitProposalByWhitelist( string memory title, string memory discussion, uint256 deadline, string[] memory options, address proposer, string memory description) external;
-
     function submitHistoryProposalByWhitelist( string memory title, string memory discussion, uint256 deadline, string[] memory options, uint256[] memory optionVotes, address proposer, string memory description) external;
-
-    function setExtendDelay(uint256 _extendDelay) external;
 
     function setPoolWhitelist(address pool, bool flag) external;
 
