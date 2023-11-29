@@ -387,8 +387,8 @@ contract Governance is AccessControl, IGovernance, Initializable {
         _voteThroughPos(proposalId, optionId, power, availableVotePower, pool);
     }
 
-    function updateEspaceCoreBlockNumber() public {
-        eSpaceSetCoreBlockNumber();
+    function updateEspaceCoreChainInfo() public {
+        eSpaceUpdateCoreChainInfo();
     }
 
     ///////////////////////////// cross space methods ////////////////////////////
@@ -420,9 +420,9 @@ contract Governance is AccessControl, IGovernance, Initializable {
         return abi.decode(nums, (uint256[]));
     }
 
-    function eSpaceSetCoreBlockNumber() internal {
+    function eSpaceUpdateCoreChainInfo() internal {
         if (espaceGovernance == address(0)) {return;}
-        CROSS_SPACE_CALL.callEVM(_ePoolGovB20(), abi.encodeWithSignature("setCoreBlockNumber(uint256)", block.number));
+        CROSS_SPACE_CALL.callEVM(_ePoolGovB20(), abi.encodeWithSignature("updateCoreChainInfo(uint256,uint64)", block.number, PARAMS_CONTROL.currentRound()));
     }
 
     function _ePoolGovB20() internal view returns (bytes20) {

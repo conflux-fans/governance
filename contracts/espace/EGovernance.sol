@@ -16,7 +16,9 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
     bytes32 private constant PROPOSAL_ROLE = keccak256("PROPOSAL_ROLE");
 
     address public coreGovernanceBridge;
-    uint256 public coreBlockNumber;
+
+    uint256 public coreSpaceBlockNumber;
+    uint64 public coreSpaceVoteRound;
     
     // proposal
     // address public nextProposer;
@@ -62,7 +64,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         res.optionVotes = proposal.optionVotes;
         res.proposer = proposal.proposer;
         res.proposalId = idx;
-        if (res.deadline < coreBlockNumber) {
+        if (res.deadline < coreSpaceBlockNumber) {
             res.status = "Closed";
         } else {
             res.status = "Active";
@@ -233,8 +235,9 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         _coreProposalOptionVotes[propoalId] = optionVotes;
     }
 
-    function setCoreBlockNumber(uint256 blockNumber) public onlyBridge {
-        coreBlockNumber = blockNumber;
+    function updateCoreChainInfo(uint256 blockNumber, uint64 voteRound) public onlyBridge {
+        coreSpaceBlockNumber = blockNumber;
+        coreSpaceVoteRound = voteRound;
     }
 
     function addSubmiter(address user) public onlyRole(PROPOSAL_ROLE) {
@@ -287,7 +290,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
     }
 
     function vote(uint256 proposalId, uint256 optionId, uint256 power) public {
-        uint256 availableVotePower = power;  // note espace do not support vote pow vote power
+        uint256 availableVotePower = 0;  // note espace do not support vote pow vote power
         _vote(proposalId, optionId, power, availableVotePower);
     }
 

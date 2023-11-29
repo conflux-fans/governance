@@ -7,7 +7,7 @@ async function main() {
     const governance = await conflux.getContractAt("Governance", process.env.GOVERNANCE as string);
 
     setInterval(async () => {
-        let receipt = await governance.updateEspaceCoreBlockNumber().sendTransaction({
+        let receipt = await governance.updateEspaceCoreChainInfo().sendTransaction({
             from: account,
         }).executed();
     }, 1000 * 60 * 5); // five minutes
