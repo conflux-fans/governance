@@ -17,8 +17,8 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
 
     address public coreGovernanceBridge;
 
-    uint256 public coreSpaceBlockNumber;
-    uint64 public coreSpaceVoteRound;
+    uint256 private coreSpaceBlockNumber;
+    uint64 private coreSpaceVoteRound;
     
     // proposal
     // address public nextProposer;
@@ -235,9 +235,17 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         _coreProposalOptionVotes[propoalId] = optionVotes;
     }
 
-    function updateCoreChainInfo(uint256 blockNumber, uint64 voteRound) public onlyBridge {
-        coreSpaceBlockNumber = blockNumber;
-        coreSpaceVoteRound = voteRound;
+    function updateCoreChainInfo(uint256 _blockNumber, uint64 _voteRound) public onlyBridge {
+        coreSpaceBlockNumber = _blockNumber;
+        coreSpaceVoteRound = _voteRound;
+    }
+
+    function blockNumber() public view returns (uint256) {
+        return coreSpaceBlockNumber;
+    }
+
+    function currentVoteRound() public view returns (uint64) {
+        return coreSpaceVoteRound;
     }
 
     function addSubmiter(address user) public onlyRole(PROPOSAL_ROLE) {

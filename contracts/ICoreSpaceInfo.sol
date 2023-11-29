@@ -2,6 +2,6 @@
 pragma solidity ^0.8.0;
 
 interface ICoreSpaceInfo {
-    function coreSpaceBlockNumber() external view returns (uint256);
-    function coreSpaceVoteRound() external view returns (uint256);
+    function blockNumber() external view returns (uint256);
+    function currentVoteRound() external view returns (uint64);
 }
