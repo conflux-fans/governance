@@ -240,10 +240,11 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         coreSpaceVoteRound = _voteRound;
     }
 
+    // this is the method for ICoreSpaceInfo, which will return the latest core space block number
     function blockNumber() public view returns (uint256) {
         return coreSpaceBlockNumber;
     }
-
+    // return the current vote round of core space
     function currentVoteRound() public view returns (uint64) {
         return coreSpaceVoteRound;
     }
