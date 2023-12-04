@@ -67,6 +67,24 @@ task("upgradeEgov", "Upgrade espace governance contract")
         console.log(`Upgrade to ${contract.target} success`);
     });
 
+// @ts-ignore
+task("upgradeGov", "Upgrade governance contract")
+    .setAction(async (args: {}, hre: any) => {
+        const [deployer] = await hre.conflux.getSigners();
+
+        const Governance = await hre.conflux.getContractFactory("Governance");
+        const deployReceipt = await Governance.constructor(3600).sendTransaction({
+            from: deployer.address,
+        }).executed();
+        const implAddr = deployReceipt.contractCreated;
+
+        const contract = await hre.conflux.getContractAt("Proxy1967", process.env.GOVERNANCE as string);
+        const receipt = await contract.upgradeTo(implAddr).sendTransaction({
+            from: deployer.address,
+        }).executed();
+        console.log(`Upgrade to ${implAddr} success`);
+    });
+
 
 
 const config: HardhatUserConfig = {

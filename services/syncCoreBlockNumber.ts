@@ -10,6 +10,7 @@ async function main() {
         let receipt = await governance.updateEspaceCoreChainInfo().sendTransaction({
             from: account,
         }).executed();
+        console.log(`Update Espace Core Chain Info: ${receipt.outcomeStatus === 0 ? 'Success' : 'Failed'}`)
     }, 1000 * 60 * 5); // five minutes
     
     console.log('Finished');

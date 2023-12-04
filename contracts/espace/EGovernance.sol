@@ -45,10 +45,6 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         coreGovernanceBridge = bridge;
     }
 
-    function getBlockNumber() public view returns (uint256) {
-        return block.number;
-    }
-
     function summarizeProposal(uint256 idx)
         internal
         view
@@ -155,20 +151,11 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
                 winner = proposal.optionVotes.length;
             }
         }
+        
+        // todo consider core space votes
+
         return winner;
     }
-
-    /* function userPoSStakes(address user) public view returns (uint256) {
-        uint256 totalPoSVotes = 0;
-        // sum votes in pos pools
-        uint256 len = poolWhitelist.length();
-        for(uint256 i = 0; i < len; i++) {
-            address pool = poolWhitelist.at(i);
-            IPoSPool.UserSummary memory userSummary = IPoSPool(pool).userSummary(user);
-            totalPoSVotes += userSummary.available;
-        }
-        return totalPoSVotes * 1000 ether;
-    } */
 
     function _submit(
         string memory title,
