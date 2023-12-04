@@ -13,7 +13,7 @@ async function main() {
         console.log(`Update Espace Core Chain Info: ${receipt.outcomeStatus === 0 ? 'Success' : 'Failed'}`)
     }, 1000 * 60 * 5); // five minutes
     
-    console.log('Finished');
+    console.log('Service Started');
 }
 
 // We recommend this pattern to be able to use async/await everywhere
