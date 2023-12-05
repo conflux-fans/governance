@@ -7,10 +7,14 @@ async function main() {
     const governance = await conflux.getContractAt("Governance", process.env.GOVERNANCE as string);
 
     setInterval(async () => {
-        let receipt = await governance.updateEspaceCoreChainInfo().sendTransaction({
-            from: account,
-        }).executed();
-        console.log(`Update Espace Core Chain Info: ${receipt.outcomeStatus === 0 ? 'Success' : 'Failed'}`)
+        try {
+            let receipt = await governance.updateEspaceCoreChainInfo().sendTransaction({
+                from: account,
+            }).executed();
+            console.log(`Update Espace Core Chain Info: ${receipt.outcomeStatus === 0 ? 'Success' : 'Failed'}`)
+        } catch (error) {
+            console.log(error);
+        }
     }, 1000 * 60 * 5); // five minutes
     
     console.log('Service Started');
