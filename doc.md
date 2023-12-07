@@ -72,8 +72,8 @@ interface IGovernance {
 
 ## eSpace proposal
 
-为了允许 eSpace 的矿池参与 proposal 投票, 同时会在 eSpace 中部署一个 Governance 合约. 目前限制 proposal 的添加只能通过 core space, core space 的增加方法会同步在 espace 的 governance 合约中增加一个 proposal.
+为了允许 eSpace 的矿池参与 proposal 投票, 同时会在 eSpace 中部署一个 Governance 合约. 目前限制 proposal 的添加只能通过 core space, core space 的增加方法会同步在 eSpace 的 governance 合约中增加一个 proposal.
 
-另外 proposal 的终止也由 core space 来决定, 在 core 中终止后, 需要同步更新 eSpace 对应 proposal 的终止状态(deadline).
+Core 和 eSpace 的 governance 合约允许同时进行投票，各选项的票数为 Core 和 eSpace 之和.
 
-core 和 espace 的 governance 合约各自进行投票, 投票结束后, 在 core 中统计结果, 统计时会累加两个 space 的投票结果.
+eSpace 的 Governance 合约接口同 Core 保持一致，只是关闭了 pow 投票接口 (`vote`), 只允许通过 PoS 矿池进行投票 (`voteThroughPosPool`).

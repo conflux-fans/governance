@@ -84,9 +84,11 @@ contract Governance is AccessControl, IGovernance, Initializable {
         }
 
         // add espace votes
-        uint256[] memory espaceVotes = eSpaceGetPoposalOptionVotes(idx);
-        for(uint256 i = 0; i < res.optionVotes.length; ++i) {
-            res.optionVotes[i] += espaceVotes[i];
+        if (espaceGovernance != address(0)) {
+            uint256[] memory espaceVotes = eSpaceGetPoposalOptionVotes(idx);
+            for(uint256 i = 0; i < res.optionVotes.length; ++i) {
+                res.optionVotes[i] += espaceVotes[i];
+            }
         }
 
         return res;
@@ -153,15 +155,35 @@ contract Governance is AccessControl, IGovernance, Initializable {
 
     function getWinner(uint256 proposalId) public view returns (uint256) {
         Proposal storage proposal = proposals[proposalId];
+
         uint256 winner = proposal.optionVotes.length;
         uint256 winnerVoted = 0;
-        for (uint256 i = 0; i < proposal.optionVotes.length; ++i)
-            if (proposal.optionVotes[i] > winnerVoted) {
-                winnerVoted = proposal.optionVotes[i];
-                winner = i;
-            } else if (proposal.optionVotes[i] == winnerVoted) {
-                winner = proposal.optionVotes.length;
+
+        uint256[] memory votes = new uint256[](proposal.optionVotes.length);
+
+        // add eSpace votes
+        if (espaceGovernance != address(0)) {
+            uint256[] memory espaceVotes = eSpaceGetPoposalOptionVotes(proposalId);
+            for(uint256 i = 0; i < proposal.optionVotes.length; ++i) {
+                votes[i] += espaceVotes[i];
             }
+        }
+
+        // add core space votes
+        for(uint256 i = 0; i < proposal.optionVotes.length; ++i) {
+            votes[i] += proposal.optionVotes[i];
+        }
+
+
+        for (uint256 i = 0; i < votes.length; ++i) {
+            if (votes[i] > winnerVoted) {
+                winnerVoted = votes[i];
+                winner = i;
+            } else if (votes[i] == winnerVoted) { // if two options have same votes, the winner will set to no one
+                winner = votes.length;
+            }
+        }
+
         return winner;
     }
 

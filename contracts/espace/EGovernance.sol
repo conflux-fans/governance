@@ -152,7 +152,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
             }
         }
         
-        // todo consider core space votes
+        // TODO consider core space votes
 
         return winner;
     }
@@ -286,6 +286,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
     }
 
     function vote(uint256 proposalId, uint256 optionId, uint256 power) public {
+        require(false, "eSpace do not support");
         uint256 availableVotePower = 0;  // note espace do not support vote pow vote power
         _vote(proposalId, optionId, power, availableVotePower);
     }
