@@ -9,14 +9,26 @@ dotenv.config();
 task("setWhitelist", "Set pool whitelist")
     .addParam("pool", "The pool's address")
     .addParam("white", "Is one pool whitelisted")
-    .setAction(async (args: {pool: string, white: boolean}, hre: any) => {
+    .setAction(async (args: {pool: string, white: string}, hre: any) => {
         const contract = await hre.conflux.getContractAt("Governance", process.env.GOVERNANCE as string);
         const { pool, white } = args;
         const [account] = await hre.conflux.getSigners();
-        const receipt = await contract.setPoolWhitelist(pool, white).sendTransaction({
+        const receipt = await contract.setPoolWhitelist(pool, white === 'true').sendTransaction({
             from: account.address,
         }).executed();
         console.log(`Set ${pool} to ${white} tx hash: ${receipt.transactionHash}`);
+    });
+
+// @ts-ignore
+task("setEgovWhitelist", "Set pool whitelist")
+    .addParam("pool", "The pool's address")
+    .addParam("white", "Is one pool whitelisted")
+    .setAction(async (args: {pool: string, white: string}, hre: any) => {
+        const contract = await hre.ethers.getContractAt("Governance", process.env.EGOVERNANCE as string);
+        const { pool, white } = args;
+        const tx = await contract.setPoolWhitelist(pool, white === 'true');
+        await tx.wait();
+        console.log(`Set ${pool} to ${white} tx hash: ${tx.hash}`);
     });
 
 // @ts-ignore
@@ -39,8 +51,10 @@ task("setEspaceGov", "set espace governance address")
         const contract = await hre.conflux.getContractAt("Governance", process.env.GOVERNANCE as string);
         const { address } = args;
         const [account] = await hre.conflux.getSigners();
+        let nonce = await hre.conflux.getNextNonce(account.address);
         const receipt = await contract.setEspaceGovernance(address).sendTransaction({
             from: account.address,
+            nonce,
         }).executed();
         console.log(`setEspaceGovernance ${address} tx hash: ${receipt.transactionHash}`);
     });
@@ -72,15 +86,19 @@ task("upgradeGov", "Upgrade governance contract")
     .setAction(async (args: {}, hre: any) => {
         const [deployer] = await hre.conflux.getSigners();
 
+        let nonce = await hre.conflux.getNextNonce(deployer.address);
         const Governance = await hre.conflux.getContractFactory("Governance");
         const deployReceipt = await Governance.constructor(3600).sendTransaction({
             from: deployer.address,
+            nonce,
         }).executed();
         const implAddr = deployReceipt.contractCreated;
 
+        nonce = await hre.conflux.getNextNonce(deployer.address);
         const contract = await hre.conflux.getContractAt("Proxy1967", process.env.GOVERNANCE as string);
         const receipt = await contract.upgradeTo(implAddr).sendTransaction({
             from: deployer.address,
+            nonce,
         }).executed();
         console.log(`Upgrade to ${implAddr} success`);
     });
