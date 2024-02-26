@@ -100,7 +100,7 @@ task("upgradeGov", "Upgrade governance contract")
             from: deployer.address,
             nonce,
         }).executed();
-        console.log(`Upgrade to ${implAddr} success`);
+        console.log(`Upgrade to ${implAddr} ${receipt.outcomeStatus === 0 ? 'success' : 'failed'}`);
     });
 
 
@@ -119,6 +119,11 @@ const config: HardhatUserConfig = {
             accounts: [process.env.PRIVATE_KEY as string],
             chainId: 1,
         },
+        ecfx: {
+            url: "https://evm.confluxrpc.com",
+            accounts: [process.env.PRIVATE_KEY as string],
+            chainId: 1030,
+        },
         ecfx_dev: {
             url: "https://evmtestnet.confluxrpc.com",
             accounts: [process.env.PRIVATE_KEY as string],
@@ -128,6 +133,11 @@ const config: HardhatUserConfig = {
             url: "http://net8888cfx.confluxrpc.com",
             accounts: [process.env.PRIVATE_KEY as string],
             chainId: 8888,
+        },
+        net8889: {
+            url: "http://net8889eth.confluxrpc.com",
+            accounts: [process.env.PRIVATE_KEY as string],
+            chainId: 8889,
         }
     }
 };
