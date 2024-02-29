@@ -15,7 +15,7 @@ async function main() {
         } catch (error) {
             console.log(error);
         }
-    }, 1000 * 60 * 5); // five minutes
+    }, 1000 * 60 * 1); // one minutes
     
     console.log('Service Started');
 }
