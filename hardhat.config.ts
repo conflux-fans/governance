@@ -46,17 +46,15 @@ task("addSubmitter", "add submitter")
 
 // @ts-ignore
 task("setEspaceGov", "set espace governance address")
-    .addParam("address", "The account's address")
     .setAction(async (args: {address: string}, hre: any) => {
         const contract = await hre.conflux.getContractAt("Governance", process.env.GOVERNANCE as string);
-        const { address } = args;
         const [account] = await hre.conflux.getSigners();
         let nonce = await hre.conflux.getNextNonce(account.address);
-        const receipt = await contract.setEspaceGovernance(address).sendTransaction({
+        const receipt = await contract.setEspaceGovernance(process.env.EGOVERNANCE).sendTransaction({
             from: account.address,
             nonce,
         }).executed();
-        console.log(`setEspaceGovernance ${address} tx hash: ${receipt.transactionHash}`);
+        console.log(`setEspaceGovernance ${process.env.EGOVERNANCE} tx hash: ${receipt.transactionHash}`);
     });
 
 // @ts-ignore

@@ -78,6 +78,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         return proposalCnt;
     }
 
+    // not used in espace
     function getVoteForProposal(uint256 proposalId, address voter, uint256 option)
         public
         view
@@ -88,6 +89,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         return proposal.votedPower[voter][option];
     }
 
+    // not used in espace
     function getVoteForProposal(uint256 proposalId, address voter) public view returns (uint256[] memory) {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
@@ -117,6 +119,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         return summarizeProposal(proposalId);
     }
 
+    // only return espace votes
     function getProposalOptionVotes(uint256 proposalId) public view returns (uint256[] memory) {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
@@ -152,7 +155,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
             }
         }
         
-        // TODO consider core space votes
+        // TODO: consider core space votes
 
         return winner;
     }
@@ -252,6 +255,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         }
     }
 
+    // not used in espace
     function _vote(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower) internal {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
@@ -285,6 +289,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
 
     }
 
+    // not used in espace
     function vote(uint256 proposalId, uint256 optionId, uint256 power) public {
         require(false, "eSpace do not support");
         uint256 availableVotePower = 0;  // note espace do not support vote pow vote power
@@ -323,7 +328,6 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         emit Voted(proposalId, msg.sender, optionId, power);
     }
 
-    // todo test
     function voteThroughPosPool(address pool, uint256 proposalId, uint256 optionId, uint256 power) public {
         require(poolWhitelist.contains(pool), "pool is not in whitelist");
         uint256 availableVotePower = IPoSPool(pool).userVotePower(msg.sender);
