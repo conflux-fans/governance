@@ -24,7 +24,7 @@ npx hardhat run scripts/eSpace/02_setupGov.ts --network ecfx
 Set the eSpace contract address in the core space contract.
 
 ```bash
-npx hardhat npx hardhat setEspaceGov --address 0x0353A4516f2F271Cb777c9775Cee6552bE9f4B2d --network cfx
+npx hardhat setEspaceGov --address 0x0353A4516f2F271Cb777c9775Cee6552bE9f4B2d --network cfx
 ```
 
 ### start the core space block number sync service

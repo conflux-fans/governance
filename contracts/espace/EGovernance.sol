@@ -194,7 +194,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         address proposer,
         string memory description
     ) public onlyRole(PROPOSAL_ROLE) {
-        require(deadline < block.number, "history proposal is not closed");
+        // require(deadline < block.number, "history proposal is not closed");
         _submit(title, discussion, deadline, options, proposer, description);
         // proposals[proposals.length - 1].optionVotes = optionVotes;
         _coreProposalOptionVotes[proposalCnt - 1] = optionVotes;
