@@ -214,6 +214,25 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
         _submit(title, discussion, deadline, options, proposer, description);
     }
 
+    function updateProposal(
+        uint256 proposalId,
+        string memory title,
+        string memory discussion,
+        uint256 deadline,
+        string[] memory options,
+        address proposer,
+        string memory description
+    ) public onlyBridge {
+        Proposal storage proposal = proposals[proposalId];
+
+        proposal.title = title;
+        proposal.discussion = discussion;
+        proposal.description = description;
+        proposal.deadline = deadline;
+        proposal.options = options;
+        proposal.proposer = proposer;
+    }
+
     function setProposalDeadline(uint256 proposalId, uint256 deadline) public onlyBridge {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];

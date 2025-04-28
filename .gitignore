@@ -10,3 +10,5 @@ cache
 artifacts
 tmp
 scripts/test.ts
+docs/info.md
+.DS_Store

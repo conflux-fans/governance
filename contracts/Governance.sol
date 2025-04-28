@@ -272,6 +272,29 @@ contract Governance is AccessControl, IGovernance, Initializable {
         _submit(title, discussion, deadline, options, proposer, description);
     }
 
+    function updateProposalByWhitelist(
+        uint256 proposalId,
+        string memory title,
+        string memory discussion,
+        uint256 deadline,
+        string[] memory options,
+        address proposer,
+        string memory description
+    ) public onlyRole(PROPOSAL_ROLE) {
+        require(proposalId < proposalCnt, "invalid proposal ID");
+        
+        Proposal storage proposal = proposals[proposalId];
+
+        proposal.title = title;
+        proposal.discussion = discussion;
+        proposal.description = description;
+        proposal.deadline = deadline;
+        proposal.options = options;
+        proposal.proposer = proposer;
+
+        eSpaceUpdateProposal(proposalId, title, discussion, deadline, options, proposer, description);
+    }
+
     function submitHistoryProposalByWhitelist(
         string memory title,
         string memory discussion,
@@ -424,6 +447,19 @@ contract Governance is AccessControl, IGovernance, Initializable {
     ) internal {
         if (espaceGovernance == address(0)) {return;}
         CROSS_SPACE_CALL.callEVM(_ePoolGovB20(), abi.encodeWithSignature("submitProposal(string,string,uint256,string[],address,string)", title, discussion, deadline, options, proposer, description));
+    }
+
+    function eSpaceUpdateProposal(
+        uint256 proposalId,
+        string memory title,
+        string memory discussion,
+        uint256 deadline,
+        string[] memory options,
+        address proposer,
+        string memory description
+    ) internal {
+        if (espaceGovernance == address(0)) {return;}
+        CROSS_SPACE_CALL.callEVM(_ePoolGovB20(), abi.encodeWithSignature("updateProposal(uint256,string,string,uint256,string[],address,string)", proposalId, title, discussion, deadline, options, proposer, description));
     }
 
     function eSpaceSetProposalCoreVotes(uint256 proposalId, uint256[] memory optionVotes) internal {
