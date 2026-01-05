@@ -45,5 +45,5 @@ npx hardhat setWhitelist --pool cfxtest:aa....b2a5 --white true --network cfx_de
 eSpace:
 
 ```sh
-npx hardhat setEgovWhitelist --pool cfxtest:aa....b2a5 --white true --network ecfx_dev
+npx hardhat setEgovWhitelist --pool 0x1E91e86C7f48DDAB885d0f21b2F83965a549E233 --white true --network ecfx_dev
 ```
