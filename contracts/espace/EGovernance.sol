@@ -278,7 +278,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
     function _vote(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower) internal {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
-        require(proposal.deadline >= block.number, "the proposal has finished");
+        require(proposal.deadline >= coreSpaceBlockNumber, "the proposal has finished");
         require(optionId < proposal.options.length, "invalid option ID");
 
         uint256 lastVotedPower = proposal.votedPower[msg.sender][optionId];
@@ -318,7 +318,7 @@ contract EGovernance is AccessControl, IGovernance, Initializable {
     function _voteThroughPos(uint256 proposalId, uint256 optionId, uint256 power, uint256 availableVotePower, address pool) internal {
         require(proposalId < proposalCnt, "invalid proposal ID");
         Proposal storage proposal = proposals[proposalId];
-        require(proposal.deadline >= block.number, "the proposal has finished");
+        require(proposal.deadline >= coreSpaceBlockNumber, "the proposal has finished");
         require(optionId < proposal.options.length, "invalid option ID");
 
         uint256 lastVotedPower = proposal.posPoolVotedPower[pool][msg.sender][optionId];
